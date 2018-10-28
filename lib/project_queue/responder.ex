@@ -1,4 +1,4 @@
-defmodule ProjectQueue.Worker do
+defmodule ProjectQueue.Responder do
   use GenServer
   use AMQP
 
@@ -56,7 +56,7 @@ defmodule ProjectQueue.Worker do
     number = String.to_integer(payload)
     if number <= 10 do
       :ok = Basic.ack channel, tag
-      IO.puts "Worker consumed a #{number}."
+      IO.puts "Responder consumed a #{number}."
     else
       :ok = Basic.reject channel, tag, requeue: false
       IO.puts "#{number} is too big and was rejected."

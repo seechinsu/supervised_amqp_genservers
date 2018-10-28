@@ -10,7 +10,8 @@ defmodule ProjectQueue.Application do
     children = [
       # Starts a worker by calling: ProjectQueue.Worker.start_link(arg)
       # {ProjectQueue.Worker, arg},
-      {ProjectQueue.Worker, [name: :project_queue_worker]}
+      {ProjectQueue.Worker, [name: :project_queue_worker]},
+      {ProjectQueue.Responder, [name: :project_queue_responder]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
