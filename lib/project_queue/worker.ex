@@ -2,8 +2,8 @@ defmodule ProjectQueue.Worker do
   use GenServer
   use AMQP
 
-  def start_link([]) do
-    GenServer.start_link(__MODULE__, [], [])
+  def start_link(args) do
+    GenServer.start_link(__MODULE__, [], args)
   end
 
   @exchange    "gen_server_test_exchange"
