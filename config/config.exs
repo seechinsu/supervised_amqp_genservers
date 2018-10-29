@@ -9,9 +9,10 @@ use Mix.Config
 # 3rd-party users, it should be done in your "mix.exs" file.
 
 # Configuration for solr
-config :hui, :default,
+config :hui, :updater,
 url: "http://localhost:8983/solr/test",
-headers: [{"accept", "application/json"}] # optional
+headers: [{"Content-type", "application/json"}], # optional
+handler: "update"
 
 # You can configure your application as:
 #

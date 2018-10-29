@@ -73,9 +73,13 @@ defmodule ProjectQueue.Worker do
 
   defp consume(channel, tag, redelivered, payload) do
     number = String.to_integer(payload)
+    str_num = Poison.decode!(~s({"actors": #{number}}), %{})
+    {:ok, url} = Hui.URL.configured_url(:updater)
+    {:ok, response} = Hui.update(url, str_num)
+    IO.puts("response: #{response.status_code}")
     if number <= 10 do
       :ok = Basic.ack channel, tag
-      IO.puts "Worker consumed a #{number}. Also, you know search."
+      IO.puts("Worker consumed a #{number}. Also, you know search.")
     else
       :ok = Basic.reject channel, tag, requeue: false
       IO.puts "#{number} is too big and was rejected."
