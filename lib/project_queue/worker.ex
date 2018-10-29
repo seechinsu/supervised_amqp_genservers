@@ -11,15 +11,34 @@ defmodule ProjectQueue.Worker do
   @queue_error "#{@queue}_error"
 
   def init(_opts) do
-    {:ok, conn} = Connection.open("amqp://user:bitnami@localhost")
-    {:ok, chan} = Channel.open(conn)
-    setup_queue(chan)
+    rabbitmq_connect()
+  end
 
-    # Limit unacknowledged messages to 10
-    :ok = Basic.qos(chan, prefetch_count: 10)
-    # Register the GenServer process as a consumer
-    {:ok, _consumer_tag} = Basic.consume(chan, @queue)
-    {:ok, chan}
+  defp rabbitmq_connect do
+    case Connection.open("amqp://user:bitnami@localhost") do
+      {:ok, conn} ->
+        # Get notifications when the connection goes down
+        Process.monitor(conn.pid)
+        # Everything else remains the same
+        {:ok, chan} = Channel.open(conn)
+        setup_queue(chan)
+        Basic.qos(chan, prefetch_count: 10)
+        {:ok, _consumer_tag} = Basic.consume(chan, @queue)
+        {:ok, chan}
+
+      {:error, _} ->
+        # Reconnection loop
+        :timer.sleep(10000)
+        rabbitmq_connect()
+    end
+  end
+
+  # 2. Implement a callback to handle DOWN notifications from the system
+  #    This callback should try to reconnect to the server
+
+  def handle_info({:DOWN, _, :process, _pid, _reason}, _) do
+    {:ok, chan} = rabbitmq_connect()
+    {:noreply, chan}
   end
 
   # Confirmation sent by the broker after registering this process as a consumer
@@ -56,7 +75,7 @@ defmodule ProjectQueue.Worker do
     number = String.to_integer(payload)
     if number <= 10 do
       :ok = Basic.ack channel, tag
-      IO.puts "Worker consumed a #{number}."
+      IO.puts "Worker consumed a #{number}. Also, you know search."
     else
       :ok = Basic.reject channel, tag, requeue: false
       IO.puts "#{number} is too big and was rejected."

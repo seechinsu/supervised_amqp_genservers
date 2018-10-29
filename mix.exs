@@ -27,7 +27,11 @@ defmodule ProjectQueue.MixProject do
       {:amqp, "~> 1.0"},
       {:ranch, "~> 1.6.2", override: true},
       {:ranch_proxy_protocol, "~> 2.1.1", override: true},
-      {:lager, "~> 3.6.6", override: true}
+      {:lager, "~> 3.6.6", override: true},
+      {:hui, "~> 0.8.2"},
+      {:httpoison, "~> 1.3.1"},
+      {:poison, "~> 4.0.1"},
+      {:cowboy, "~> 1.0"}
     ]
   end
 end

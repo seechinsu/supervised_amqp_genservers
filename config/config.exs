@@ -8,6 +8,11 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
+# Configuration for solr
+config :hui, :default,
+url: "http://localhost:8983/solr/test",
+headers: [{"accept", "application/json"}] # optional
+
 # You can configure your application as:
 #
 #     config :project_queue, key: :value
