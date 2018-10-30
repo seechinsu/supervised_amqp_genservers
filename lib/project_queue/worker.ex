@@ -13,7 +13,7 @@ defmodule ProjectQueue.Worker do
   @elastic_url Elastix.config(:elastic_url)
 
   def init(_opts) do
-    elastic_connect()
+    elastic_create_index()
     rabbitmq_connect()
   end
 
@@ -36,7 +36,7 @@ defmodule ProjectQueue.Worker do
     end
   end
 
-  defp elastic_connect do
+  defp elastic_create_index do
     Index.create(@elastic_url, "twitter", %{})
   end
 
