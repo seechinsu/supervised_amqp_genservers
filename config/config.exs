@@ -8,11 +8,9 @@ use Mix.Config
 # if you want to provide default values for your application for
 # 3rd-party users, it should be done in your "mix.exs" file.
 
-# Configuration for solr
-config :hui, :updater,
-url: "http://localhost:8983/solr/test",
-headers: [{"Content-type", "application/json"}], # optional
-handler: "update"
+config :elastix,
+  json_codec: Jason,
+  elastic_url: "http://localhost:9200"
 
 # You can configure your application as:
 #

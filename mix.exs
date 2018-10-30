@@ -28,10 +28,8 @@ defmodule ProjectQueue.MixProject do
       {:ranch, "~> 1.6.2", override: true},
       {:ranch_proxy_protocol, "~> 2.1.1", override: true},
       {:lager, "~> 3.6.6", override: true},
-      {:hui, "~> 0.8.2"},
-      {:httpoison, "~> 1.3.1"},
-      {:poison, "~> 4.0.1"},
-      {:cowboy, "~> 1.0"}
+      {:elastix, "~> 0.6.0"},
+      {:jason, "~> 1.1"}
     ]
   end
 end

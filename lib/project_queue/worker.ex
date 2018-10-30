@@ -1,16 +1,19 @@
 defmodule ProjectQueue.Worker do
   use GenServer
   use AMQP
+  alias Elastix.{Document, Index}
 
   def start_link(args) do
     GenServer.start_link(__MODULE__, [], args)
   end
 
-  @exchange    "gen_server_test_exchange"
-  @queue       "gen_server_test_queue"
+  @exchange    "twitter"
+  @queue       "twitter-es-pika"
   @queue_error "#{@queue}_error"
+  @elastic_url Elastix.config(:elastic_url)
 
   def init(_opts) do
+    elastic_connect()
     rabbitmq_connect()
   end
 
@@ -31,6 +34,10 @@ defmodule ProjectQueue.Worker do
         :timer.sleep(10000)
         rabbitmq_connect()
     end
+  end
+
+  defp elastic_connect do
+    Index.create(@elastic_url, "twitter", %{})
   end
 
   # 2. Implement a callback to handle DOWN notifications from the system
@@ -72,18 +79,16 @@ defmodule ProjectQueue.Worker do
   end
 
   defp consume(channel, tag, redelivered, payload) do
-    number = String.to_integer(payload)
-    str_num = Poison.decode!(~s({"actors": #{number}}), %{})
-    {:ok, url} = Hui.URL.configured_url(:updater)
-    {:ok, response} = Hui.update(url, str_num)
-    IO.puts("response: #{response.status_code}")
-    if number <= 10 do
-      :ok = Basic.ack channel, tag
-      IO.puts("Worker consumed a #{number}. Also, you know search.")
-    else
-      :ok = Basic.reject channel, tag, requeue: false
-      IO.puts "#{number} is too big and was rejected."
-    end
+
+    :ok = Basic.ack channel, tag
+    message = Jason.decode!(~s(#{payload}))
+    tweet = message["tweet"]
+    {:ok, response} = @elastic_url
+      |> Document.index_new("twitter", "tweet", %{message: tweet})
+
+    {:ok, indexed_doc} = Document.get(@elastic_url, "twitter", "tweet", response.body["_id"])
+
+    IO.inspect(indexed_doc.body["_source"]["message"])
 
   rescue
     # Requeue unless it's a redelivered message.
